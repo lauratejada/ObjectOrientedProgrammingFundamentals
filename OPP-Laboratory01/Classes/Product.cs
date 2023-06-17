@@ -1,11 +1,10 @@
-﻿using OPP_Laboratory01;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OPP_Laboratory01
+namespace OOP_Lab02.Classes
 {
     class Product
     {
@@ -32,11 +31,11 @@ namespace OPP_Laboratory01
 
         public Product(string name, int price, int code)
         {
-            if (!String.IsNullOrEmpty(name) && price > 0 && code > 0)
+            if (!string.IsNullOrEmpty(name) && price > 0 && code > 0)
             {
-                this._name = name;
-                this._price = price;
-                this._code = code;
+                _name = name;
+                _price = price;
+                _code = code;
             }
             else
             {

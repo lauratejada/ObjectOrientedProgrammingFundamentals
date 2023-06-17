@@ -1,5 +1,4 @@
-﻿using OPP_Laboratory01;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,11 +6,14 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OPP_Laboratory01
+namespace OOP_Lab02.Classes
 {
     class VendingMachine
     {
         private int _serialNumber;// a unique ID for the machine itself
+        private const int _initialSerialNumber = 0; //100 initial value of serialnumber previous to add
+        private static int _addToNextNumber = 1; //value will increase after create an instance
+        private readonly string _barCode;
         private Dictionary<int, int> _moneyFloat;//a dictionary which tracks the
                                                  //quantities of various money pieces that the machine possesses.
         private Dictionary<Product, int> _inventory;//a dictionary which tracks how many
@@ -19,24 +21,17 @@ namespace OPP_Laboratory01
         public int SerialNumber
         {
             get { return _serialNumber; }
-            set
-            {
-                if (value > 0)
-                {
-                    _serialNumber = value;
-                }
-                else
-                {
-                    throw new Exception("The serial number should be a valid number (greater than zero)");
-                }
-            }
+        }
 
+        public string BarCode
+        {
+            get { return _barCode; }
         }
 
         public Dictionary<int, int> MoneyFloat
         {
             get { return _moneyFloat; }
-            set
+            protected set
             {
                 if (value != null)
                 {
@@ -52,7 +47,7 @@ namespace OPP_Laboratory01
         public Dictionary<Product, int> Inventory
         {
             get { return _inventory; }
-            set
+            protected set
             {
                 if (value != null)
                 {
@@ -79,33 +74,24 @@ namespace OPP_Laboratory01
         }
 
         //The constructor should initialize the dictionary properties, and provide it a serial number.
-        public VendingMachine(int idNumber, Dictionary<int, int> money, Dictionary<Product, int> inventory)
+        public VendingMachine(string barCode)
         {
-            if (idNumber > 0 && money.Count > 0 && inventory.Count > 0)
+            if (!String.IsNullOrEmpty(barCode))
             {
-                this._serialNumber = idNumber;
-                this._moneyFloat = money;
-                this._inventory = inventory;
-            }
-        }
+                this._serialNumber = _initialSerialNumber + _addToNextNumber++;
+                this._barCode = barCode;
+                // initializing the quantity of coins to zero for if type of coin, and definignthe type of coins denomination  accepted
+                _moneyFloat = new Dictionary<int, int>
+                {
+                    { 20, 0 },
+                    { 10, 0 },
+                    { 5, 0 },
+                    { 2, 0 },
+                    { 1, 0 }
+                };
 
-        public VendingMachine(int idNumber)
-        {   // validating and initialazing serial number
-            if (idNumber > 0)
-            {
-                _serialNumber = idNumber;
+                _inventory = new Dictionary<Product, int>();
             }
-            // initializing the quantity of coins to zero for if type of coin
-            _moneyFloat = new Dictionary<int, int>();
-            /*{
-                { 20, 0 },
-                { 10, 0 },
-                { 5, 0 },
-                { 2, 0 },
-                { 1, 0 }
-            };*/
-
-            _inventory = new Dictionary<Product, int>();
         }
 
         //adds a product to the vending machine’s product inventory, including new items or
@@ -127,42 +113,34 @@ namespace OPP_Laboratory01
                     // if product not exist add as new in inventory
                     _inventory.Add(product, quantity);
                 }
+                return $"Succesfully added : {product.Name}, {product.Code}, {product.Price}, {_inventory[product]}";
             }
             else
             {
-                throw new Exception("This product does not exist or the quantity is not valid");
+                return "This product does not exist or the quantity is not valid";
             }
-            return $"Succesfully added : {product.Name}, {product.Code}, {product.Price}, {_inventory[product]}";
         }
 
         // adds money pieces of the given denomination to the machine’s change float.
         // It should return a string confirming the entire stock of the float.
         public string StockFloat(int moneyDenomination, int quantity)
         {
-            if (quantity > 0)
+            if (quantity > 0 && moneyDenomination > 0)
             {
-                switch (moneyDenomination)
+                if (_moneyFloat.ContainsKey(moneyDenomination))
                 {
-                    case 1: { _moneyFloat.Add(1, quantity); break; }
-                    case 2: { _moneyFloat.Add(2, quantity); break; }
-                    case 5: { _moneyFloat.Add(5, quantity); break; }
-                    case 10: { _moneyFloat.Add(10, quantity); break; }
-                    case 20: { _moneyFloat.Add(20, quantity); break; }
-                    default: { throw new Exception("This coin is not valid"); break; }
+                    _moneyFloat[moneyDenomination] += quantity;
+                    return $"Succesfully added: ${moneyDenomination}: {quantity}";
+                }
+                else
+                {   //_moneyFloat[moneyDenomination] = quantity;
+                    return "This denomination of coin is not accepted in this machine";
                 }
             }
             else
             {
-                throw new Exception("The quantity of coins is not valid");
+                return "The quantity of coins is not valid";
             }
-
-            //Console.WriteLine("money inventory");
-            string stringOfStockOfFloat = "";
-            foreach (KeyValuePair<int, int> money in _moneyFloat)
-            {
-                stringOfStockOfFloat += $" ${money.Key}: {money.Value}, ";
-            }
-            return $"Succesfully added: \n {stringOfStockOfFloat}";
         }
 
         //provides a product code to the machine and a list of money pieces provided. 
@@ -177,7 +155,6 @@ namespace OPP_Laboratory01
             int productPrice = 0;
             int changeRequiredAmount = 0;
             bool productIsInStock;
-            string returnMessage = "";
             if (!String.IsNullOrEmpty(code))
             {
                 bool productCodeExists = false;
@@ -186,6 +163,7 @@ namespace OPP_Laboratory01
                     productIsInStock = false;
                     if (item.Key.Code.ToString() == code)
                     {
+                        productCodeExists = true;
                         if (item.Value > 0)
                         {
                             productIsInStock = true;
@@ -193,102 +171,77 @@ namespace OPP_Laboratory01
                         }
                         else
                         {
-                            returnMessage = $"Error: Item is out of stock";
+                            return $"Error: Item is out of stock";
                         }
-                        productCodeExists = true;
                         break;
                     }
                 }
 
                 if (!productCodeExists)
                 {
-                    returnMessage = $"Error, no item with code {code}";
+                    return $"Error, no item with code {code} available";
                 }
             }
             else
             {
-                returnMessage = "Error: code is not valid";
+                return "Error: code is not valid";
             }
 
-            if (money != null && money.Count > 0)
+            if (money.Count > 0)
             {
+                //Console.WriteLine(money.Count);
                 int totalAmountEntered = 0;
+
                 foreach (int coin in money)
                 {
                     totalAmountEntered += coin;
                 }
 
-                if (totalAmountEntered > productPrice)
+                if (totalAmountEntered >= productPrice)
                 {
                     // calculate the change
                     changeRequiredAmount = totalAmountEntered - productPrice;
                 }
                 else
                 {
-                    returnMessage = "Error: insufficient money provided";
+                    return "Error: insufficient money provided";
                 }
-
             }
 
-
             // - It then vends the required change, if any, and reduces the quantity of that item in inventory and the returned change.
-           // Dictionary<int,int> changeCounter = new Dictionary<int,int>();
-
-
             if (changeRequiredAmount > 0)
-            {  
+            {
                 List<int> denominations = MoneyFloat.Keys.OrderByDescending(x => x).ToList();
-                Dictionary<int, int> changeReturned
-                     = new Dictionary<int, int>();
+                Dictionary<int, int> changeReturned = new Dictionary<int, int>();
 
                 foreach (int coin in denominations)
                 {
-                    if (changeRequiredAmount >= coin && MoneyFloat.GetValueOrDefault(coin) > 0)
+                    if (changeRequiredAmount >= coin &&
+                        MoneyFloat.GetValueOrDefault(coin) > 0)
                     {
                         int numberToDispense = changeRequiredAmount / coin;
                         if (MoneyFloat.GetValueOrDefault(coin) < numberToDispense)
-                        { 
+                        {
                             numberToDispense = MoneyFloat.GetValueOrDefault(coin);
                         }
-
                         // substract from the current amount
-                        changeRequiredAmount -= coin * numberToDispense;
-
-                        changeReturned.Add(coin, numberToDispense);
+                        changeRequiredAmount = changeRequiredAmount - (coin * numberToDispense);
                     }
                 }
 
                 if (changeRequiredAmount > 0)
                 {
-                    returnMessage = "Unable to dispense change. Returning coins inserted...";
+                    return "Unable to dispense change. Returning coins inserted...";
                 }
                 else
                 {
-                    returnMessage = "Returning your change: ";
-                    foreach (KeyValuePair<int, int> pair in changeReturned)
-                    {
-                        returnMessage += $"{pair.Key} x {pair.Value}, ";  
-                    }
-                    
+                    return "Returning your change:  ";
                 }
             }
-
-            if(changeRequiredAmount <= 0) // && productIsInStock)
+            else
             {
-                foreach (KeyValuePair<Product, int> item in _inventory)
-                {
-                    int val = 0;
-                    // productIsInStock = false;
-                    if (item.Key.Code.ToString() == code)
-                    {
-                        val = item.Value;
-                        val = val - 1;
-                       // item[KeyValuePair] = val;
-                    }
-                }
+                return $"Please enjoy your product and no change is required.";
             }
-
-            return returnMessage;
         }
     }
 }
