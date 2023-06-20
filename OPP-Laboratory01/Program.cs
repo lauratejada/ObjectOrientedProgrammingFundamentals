@@ -5,9 +5,10 @@ using System.Diagnostics;
 
 try
 {
-    VendingMachine newVendingMachine = new VendingMachine("01000");
+    Console.WriteLine();
+    VendingMachine newVendingMachine = new VendingMachine("0100");
 
-    Product product1 = new Product("CHIPS", 2, 101);
+    Product product1 = new Product("CHIPS", 0, 101);
     Product product2 = new Product("CHOCOLATE", 3, 102);
     Product product3 = new Product("CHEESE STICKS", 4, 103);
 
@@ -25,17 +26,17 @@ try
     Console.WriteLine(newVendingMachine.StockItem(product3, 10));
     Console.WriteLine(newVendingMachine.StockItem(product2, 2));
 
+    //Console.WriteLine($"Serial Number: {newVendingMachine.SerialNumber}");
+    //VendingMachine newVendingMachine2 = new VendingMachine("02000");
+   // Console.WriteLine($"Serial Number: {newVendingMachine2.SerialNumber}");
+    
     Console.Clear();
-
-    Console.WriteLine($"Serial Number: {newVendingMachine.SerialNumber}");
-    VendingMachine newVendingMachine2 = new VendingMachine("02000");
-    Console.WriteLine($"Serial Number: {newVendingMachine2.SerialNumber}");
 
     Console.WriteLine("-------- WELCOME TO THE VENDING MACHINE SYSTEM V.2 -----------");
     Console.WriteLine();
     // purchase process start in vending machine
     List<int> userMoneyAmountList = new List<int>();
-    bool validMoneyInput = false;
+    bool validMoneyInput = false; 
 
     //STEP 1: Ask for amout and validate input
     // use while to check the type of input and ask again for input type
@@ -47,7 +48,7 @@ try
         string userInputOfMoney = Console.ReadLine();
         //try to parse the user input to an int variable
         validMoneyInput = Int32.TryParse(userInputOfMoney, out userMoneyAmount);
-        if (validMoneyInput)
+        if (validMoneyInput) 
         {
             if (userMoneyAmount == 1 ||
                 userMoneyAmount == 2 ||
@@ -144,7 +145,6 @@ try
             Console.WriteLine($"Sorry, the code is invalid. Try again.");
         }
     }
-
     Console.WriteLine("Thanks for using vending machine system");
 }
 catch (Exception ex)

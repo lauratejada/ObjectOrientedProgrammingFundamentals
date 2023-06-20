@@ -11,7 +11,7 @@ namespace OOP_Lab02.Classes
         //Members
         //fields
         private string _name;
-        private int _price;
+        private int _price; 
         private int _code;
 
         //properties
@@ -31,16 +31,34 @@ namespace OOP_Lab02.Classes
 
         public Product(string name, int price, int code)
         {
-            if (!string.IsNullOrEmpty(name) && price > 0 && code > 0)
+            try
             {
-                _name = name;
-                _price = price;
-                _code = code;
+                if (string.IsNullOrEmpty(name))
+                {
+                   // Console.Write(name);
+                    throw new Exception("Please enter a valid value for the Product Name");
+                }
+
+                if (!(price > 0))
+                {
+                    //Console.Write(price);
+                    throw new Exception("Please enter a valid value for the Product Price");
+                }
+                
+                if (!(code > 0))
+                {
+                    //Console.Write(code);
+                    throw new Exception("Please enter a valid value for the Product Code");
+                }
+
+                 _name = name;
+                 _price = price;
+                 _code = code;
             }
-            else
+            catch(Exception ex)
             {
-                throw new Exception("Please enter a valid value for the Name or Price or Product Code");
+                Console.WriteLine($"Error creating product: {ex.Message}");
             }
         }
-    }
+    } 
 }

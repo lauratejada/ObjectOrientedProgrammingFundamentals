@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
@@ -76,21 +77,32 @@ namespace OOP_Lab02.Classes
         //The constructor should initialize the dictionary properties, and provide it a serial number.
         public VendingMachine(string barCode)
         {
-            if (!String.IsNullOrEmpty(barCode))
+            try
             {
-                this._serialNumber = _initialSerialNumber + _addToNextNumber++;
-                this._barCode = barCode;
-                // initializing the quantity of coins to zero for if type of coin, and definignthe type of coins denomination  accepted
-                _moneyFloat = new Dictionary<int, int>
+                if (!String.IsNullOrEmpty(barCode))
                 {
-                    { 20, 0 },
-                    { 10, 0 },
-                    { 5, 0 },
-                    { 2, 0 },
-                    { 1, 0 }
-                };
+                    this._serialNumber = _initialSerialNumber + _addToNextNumber++;
+                    this._barCode = barCode;
+                    // initializing the quantity of coins to zero for if type of coin, and definignthe type of coins denomination  accepted
+                    _moneyFloat = new Dictionary<int, int>
+                    {
+                        { 20, 0 },
+                        { 10, 0 },
+                        { 5, 0 },
+                        { 2, 0 },
+                        { 1, 0 }
+                    };
 
-                _inventory = new Dictionary<Product, int>();
+                    _inventory = new Dictionary<Product, int>();
+                }
+                else
+                {
+                    throw new Exception("The barcode value should be valid");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -100,24 +112,32 @@ namespace OOP_Lab02.Classes
         public string StockItem(Product product, int quantity)
         {
             //inventory
-            if (quantity > 0 && product != null)
+            try
             {
-                // check if product exists to add new quantity
-                if (_inventory.ContainsKey(product))
+                if (quantity > 0 && product != null)
                 {
-                    //update quantity of product by adding to the existent ones
-                    _inventory[product] = _inventory[product] + quantity;
+                    // check if product exists to add new quantity
+                    if (_inventory.ContainsKey(product))
+                    {
+                        //update quantity of product by adding to the existent ones
+                        _inventory[product] = _inventory[product] + quantity;
+                        return $"Succesfully quantity updated : {product.Name}, {product.Code}, {product.Price}, {_inventory[product]}";
+                    }
+                    else
+                    {
+                        // if product not exist add as new in inventory
+                        _inventory.Add(product, quantity);
+                        return $"Succesfully added : {product.Name}, {product.Code}, {product.Price}, {_inventory[product]}";
+                    }
                 }
                 else
                 {
-                    // if product not exist add as new in inventory
-                    _inventory.Add(product, quantity);
+                    return "This product does not exist or the quantity is not valid";
                 }
-                return $"Succesfully added : {product.Name}, {product.Code}, {product.Price}, {_inventory[product]}";
-            }
-            else
+            }   
+            catch(Exception ex) 
             {
-                return "This product does not exist or the quantity is not valid";
+                return $"{ex.Message}";
             }
         }
 
@@ -125,21 +145,28 @@ namespace OOP_Lab02.Classes
         // It should return a string confirming the entire stock of the float.
         public string StockFloat(int moneyDenomination, int quantity)
         {
-            if (quantity > 0 && moneyDenomination > 0)
+            try
             {
-                if (_moneyFloat.ContainsKey(moneyDenomination))
+                if (quantity > 0 && moneyDenomination > 0)
                 {
-                    _moneyFloat[moneyDenomination] += quantity;
-                    return $"Succesfully added: ${moneyDenomination}: {quantity}";
+                    if (_moneyFloat.ContainsKey(moneyDenomination))
+                    {
+                        _moneyFloat[moneyDenomination] += quantity;
+                        return $"Succesfully added: ${moneyDenomination}: {quantity}";
+                    }
+                    else
+                    {   
+                        return "This denomination of coin is not accepted in this machine";
+                    }
                 }
                 else
-                {   //_moneyFloat[moneyDenomination] = quantity;
-                    return "This denomination of coin is not accepted in this machine";
+                {
+                    return "The quantity of coins is not valid";
                 }
             }
-            else
+            catch(Exception ex) 
             {
-                return "The quantity of coins is not valid";
+                return $"{ex.Message}";
             }
         }
 
@@ -152,95 +179,102 @@ namespace OOP_Lab02.Classes
         {
             // - It finds that product with the code given in the machine’s product inventory,
             // ensures that it is in stock, and then ensures that the money provided is sufficient to pay for the product.
-            int productPrice = 0;
-            int changeRequiredAmount = 0;
-            bool productIsInStock;
-            if (!String.IsNullOrEmpty(code))
+            try
             {
-                bool productCodeExists = false;
-                foreach (KeyValuePair<Product, int> item in _inventory)
+                int productPrice = 0;
+                int changeRequiredAmount = 0;
+                bool productIsInStock;
+                if (!String.IsNullOrEmpty(code))
                 {
-                    productIsInStock = false;
-                    if (item.Key.Code.ToString() == code)
+                    bool productCodeExists = false;
+                    foreach (KeyValuePair<Product, int> item in _inventory)
                     {
-                        productCodeExists = true;
-                        if (item.Value > 0)
+                        productIsInStock = false;
+                        if (item.Key.Code.ToString() == code)
                         {
-                            productIsInStock = true;
-                            productPrice = item.Key.Price;
+                            productCodeExists = true;
+                            if (item.Value > 0)
+                            {
+                                productIsInStock = true;
+                                productPrice = item.Key.Price;
+                            }
+                            else
+                            {
+                                return $"Error: Item is out of stock";
+                            }
+                            break;
                         }
-                        else
-                        {
-                            return $"Error: Item is out of stock";
-                        }
-                        break;
                     }
-                }
 
-                if (!productCodeExists)
-                {
-                    return $"Error, no item with code {code} available";
-                }
-            }
-            else
-            {
-                return "Error: code is not valid";
-            }
-
-            if (money.Count > 0)
-            {
-                //Console.WriteLine(money.Count);
-                int totalAmountEntered = 0;
-
-                foreach (int coin in money)
-                {
-                    totalAmountEntered += coin;
-                }
-
-                if (totalAmountEntered >= productPrice)
-                {
-                    // calculate the change
-                    changeRequiredAmount = totalAmountEntered - productPrice;
+                    if (!productCodeExists)
+                    {
+                        return $"Error, no item with code {code} available";
+                    }
                 }
                 else
                 {
-                    return "Error: insufficient money provided";
+                    return "Error: code is not valid";
                 }
-            }
 
-            // - It then vends the required change, if any, and reduces the quantity of that item in inventory and the returned change.
-            if (changeRequiredAmount > 0)
-            {
-                List<int> denominations = MoneyFloat.Keys.OrderByDescending(x => x).ToList();
-                Dictionary<int, int> changeReturned = new Dictionary<int, int>();
-
-                foreach (int coin in denominations)
+                if (money.Count > 0)
                 {
-                    if (changeRequiredAmount >= coin &&
-                        MoneyFloat.GetValueOrDefault(coin) > 0)
+                    //Console.WriteLine(money.Count);
+                    int totalAmountEntered = 0;
+
+                    foreach (int coin in money)
                     {
-                        int numberToDispense = changeRequiredAmount / coin;
-                        if (MoneyFloat.GetValueOrDefault(coin) < numberToDispense)
-                        {
-                            numberToDispense = MoneyFloat.GetValueOrDefault(coin);
-                        }
-                        // substract from the current amount
-                        changeRequiredAmount = changeRequiredAmount - (coin * numberToDispense);
+                        totalAmountEntered += coin;
+                    }
+
+                    if (totalAmountEntered >= productPrice)
+                    {
+                        // calculate the change
+                        changeRequiredAmount = totalAmountEntered - productPrice;
+                    }
+                    else
+                    {
+                        return "Error: insufficient money provided";
                     }
                 }
 
+                // - It then vends the required change, if any, and reduces the quantity of that item in inventory and the returned change.
                 if (changeRequiredAmount > 0)
                 {
-                    return "Unable to dispense change. Returning coins inserted...";
+                    List<int> denominations = MoneyFloat.Keys.OrderByDescending(x => x).ToList();
+                    Dictionary<int, int> changeReturned = new Dictionary<int, int>();
+
+                    foreach (int coin in denominations)
+                    {
+                        if (changeRequiredAmount >= coin &&
+                            MoneyFloat.GetValueOrDefault(coin) > 0)
+                        {
+                            int numberToDispense = changeRequiredAmount / coin;
+                            if (MoneyFloat.GetValueOrDefault(coin) < numberToDispense)
+                            {
+                                numberToDispense = MoneyFloat.GetValueOrDefault(coin);
+                            }
+                            // substract from the current amount
+                            changeRequiredAmount = changeRequiredAmount - (coin * numberToDispense);
+                        }
+                    }
+
+                    if (changeRequiredAmount > 0)
+                    {
+                        return "Unable to dispense change. Returning coins inserted...";
+                    }
+                    else
+                    {
+                        return "Returning your change:  ";
+                    }
                 }
                 else
                 {
-                    return "Returning your change:  ";
+                    return $"Please enjoy your product and no change is required.";
                 }
             }
-            else
+            catch (Exception ex) 
             {
-                return $"Please enjoy your product and no change is required.";
+                return $"{ex.Message}";
             }
         }
     }
