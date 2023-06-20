@@ -1,4 +1,4 @@
-﻿using OOP_Lab02.Classes;
+﻿using OOP_Lab03.Classes;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +8,7 @@ try
     Console.WriteLine();
     VendingMachine newVendingMachine = new VendingMachine("0100");
 
-    Product product1 = new Product("CHIPS", 0, 101);
+    Product product1 = new Product("CHIPS", 2, 101);
     Product product2 = new Product("CHOCOLATE", 3, 102);
     Product product3 = new Product("CHEESE STICKS", 4, 103);
 

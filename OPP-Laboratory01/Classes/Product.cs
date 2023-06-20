@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OOP_Lab02.Classes
+namespace OOP_Lab03.Classes
 {
     class Product
     {
