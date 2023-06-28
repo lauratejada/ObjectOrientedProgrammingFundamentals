@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OPP-Lab03", "OPP-Laboratory01\OPP-Lab03.csproj", "{C55C4B3A-7B9F-40E7-9BC2-0689C2BDB051}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OPP-Lab04", "OPP-Laboratory01\OPP-Lab04.csproj", "{C55C4B3A-7B9F-40E7-9BC2-0689C2BDB051}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
